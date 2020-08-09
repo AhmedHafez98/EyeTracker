@@ -3,7 +3,8 @@ from VirtualKeyboard.GUI import VKDesign, testk
 # from GazDetection.GazDetection import GazControl
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5 import QtGui
+from pynput.mouse import Button,Controller
+from win32api import GetSystemMetrics
 
 class CurserThread(QThread):
     def __init__(self, two_d_buttons):
@@ -32,6 +33,40 @@ class EyeTrackerThread(QThread):
     def run(self):
         self.change_value.emit(self.test.comand)
 
+class MouseThread(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+        self.controller = Controller()
+        self.moving_x = 0
+        self.moving_y = 25
+        self.mxHeight=GetSystemMetrics(1)
+        self.mxWidth=GetSystemMetrics(0)
+
+    change_value = pyqtSignal(str)
+
+    def run(self):
+        while True:
+            time.sleep(.2)
+            self.controller.move(self.moving_x,self.moving_y)
+            pos=self.controller.position
+            print(pos)
+            if self.moving_y:
+                if self.moving_y>0:
+                    if pos[1]>=self.mxHeight-1:
+                        self.moving_y=-self.moving_y
+                else:
+                    if pos[1]<=0:
+                        self.moving_y=-self.moving_y
+            else :
+                if self.moving_x > 0:
+                    if pos[0] >= self.mxWidth-1:
+                        self.moving_x = -self.moving_x
+                else:
+                    if pos[0] <= 0:
+                        self.moving_x = -self.moving_x
+
+            self.change_value.emit("")
+
 class VK(QMainWindow, VKDesign.Ui_MainWindow):
 
     def __init__(self):
@@ -42,14 +77,18 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
         self.twoDButtons = list()
         self.curserThread = CurserThread(self.twoDButtons)
         self.eyeTrackerThread = EyeTrackerThread()
+        self.mouseThread=MouseThread()
         self.chosenKey = None
         self.prevKey = None
         self.caps_bool = False
         self.shift_bool = False
         self.ctrl_bool = False
         self.alt_bool = False
-        self.state=True
+        self.mouse_bool=False
+        self.curserState=True
+        self.mouseState=False
         self.speaker = pyttsx3.init()
+
         # Methods
         self.initUi()
         self.connectKeys()
@@ -94,7 +133,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
         elif sender.objectName()=='text_to_speech_b':
             self.textToSpeech()
         elif sender.objectName()=='mouse_b':
-            self.mouseController()
+            self.startMouseThread()
         else:
             keyboard.press_and_release(self.button_to_key_dic[sender.objectName()])
             self.boolTrueKey(sender)
@@ -160,6 +199,13 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 keyboard.release('alt')
                 self.l_alt_b.setStyleSheet(self.button_to_stylesheet_dic['l_alt_b'])
                 self.r_alt_b.setStyleSheet(self.button_to_stylesheet_dic['r_alt_b'])
+        if key == 'mouse_b':
+            self.mouse_bool = not self.mouse_bool
+            if self.mouse_bool:
+                self.mouse_b.setStyleSheet(self.mouse_b.styleSheet() + "background-color : #A364A0")
+            else:
+                self.mouse_b.setStyleSheet(self.button_to_stylesheet_dic['mouse_b'])
+
 
     def startCurserThread(self):
         self.curserThread.change_value.connect(self.controlCurserThread)
@@ -174,7 +220,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
             self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
 
     def vkController(self, comand):
-        if self.state:
+        if self.curserState:
             if comand=='right_blank':               #Go down
                 self.curserThread.terminate()
                 self.chosenKey.setStyleSheet(self.button_to_stylesheet_dic[self.chosenKey.objectName()])
@@ -186,7 +232,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                     self.twoDButtons[self.curserThread.row]) else self.curserThread.colmn
                 self.curserThread.start()
             elif comand=='left_blank':  #Stop Curser
-                self.state=False
+                self.curserState=False
                 self.curserThread.terminate()
             elif comand=='blank':   #press ChosenKey
                 self.chosenKey.click()
@@ -208,7 +254,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 self.chosenKey.setStyleSheet(
                     self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
             elif comand=='left_blank': #continue
-                self.state=True
+                self.curserState=True
                 self.curserThread.start()
             elif comand=='blank':self.chosenKey.click()
             elif comand=='right':   #Go right Step
@@ -247,15 +293,76 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
         self.eyeTrackerThread.change_value.connect(self.controlEyeTrackerThread)
         self.eyeTrackerThread.start()
 
-    def controlEyeTrackerThread(self, val):self.vkController(val)
+    def controlEyeTrackerThread(self, val):
+        if self.mouse_bool:
+            self.mouseController(val)
+        else:
+            self.vkController(val)
 
     def textToSpeech(self):
         selected_text=self.textEdit.textCursor().selection().toPlainText()
         self.speaker.say(selected_text if len(selected_text)>0 else self.textEdit.toPlainText())
         self.speaker.runAndWait()
 
-    def mouseController(self):
+    def startMouseThread(self):
+        self.buttonAction('mouse_b')
+        if self.curserState:
+            self.curserState = False
+            self.curserThread.terminate()
+            self.mouseState = True
+            self.mouseThread.change_value.connect(self.controlMouseThread)
+            self.mouseThread.start()
+        else:
+            self.curserState = True
+            self.curserThread.start()
+            self.mouseState=False
+            self.mouseThread.terminate()
+            return
+
+    def controlMouseThread(self,val):
         pass
+
+    def mouseController(self,val):
+        if self.mouseState:
+            if val=='blank':
+                self.mouseState=False
+                self.mouseThread.terminate()
+            elif val=='right':
+                self.mouseThread.terminate()
+                self.mouseThread.moving_x=5
+                self.mouseThread.moving_y=0
+                self.mouseThread.start()
+            elif val=='left':
+                self.mouseThread.terminate()
+                self.mouseThread.moving_x = -5
+                self.mouseThread.moving_y = 0
+                self.mouseThread.start()
+            elif val=='right_blank':
+                self.mouseThread.terminate()
+                self.mouseThread.moving_x = 0
+                self.mouseThread.moving_y = 5
+                self.mouseThread.start()
+            elif val=='left_blank':
+                self.mouseThread.terminate()
+                self.mouseThread.moving_x = 0
+                self.mouseThread.moving_y = -5
+                self.mouseThread.start()
+        else:
+            if val=='blank':
+                self.mouseThread.controller.click(Button.left,2)
+            elif val in ['right','left']:
+                self.mouseState=True
+                self.mouseThread.start()
+            elif val=='right_blank':
+                self.mouseThread.controller.click(Button.right,1)
+            elif val=='left_blank':
+                self.mouseThread.controller.click(Button.left,1)
+
+
+
+
+
+
 
 
 class TestVK(QWidget, testk.Ui_Form):
@@ -272,22 +379,36 @@ class TestVK(QWidget, testk.Ui_Form):
         self.left_blank_b.clicked.connect(self.leftBlanckClicked)
         self.right_b.clicked.connect(self.rightClicked)
         self.left_b.clicked.connect(self.leftClicked)
-
     def blankClicked(self):
-        self.vk.setFocus()
-        self.vk.vkController('blank')
+        if self.vk.mouseState:
+            self.vk.mouseController('blank')
+        else :
+            self.vk.setFocus()
+            self.vk.vkController('blank')
 
     def rightBlanckstopClicked(self):
-        self.vk.vkController('right_blank')
+        if self.vk.mouseState:
+            self.vk.mouseController('blank')
+        else :
+            self.vk.vkController('right_blank')
 
     def leftBlanckClicked(self):
-        self.vk.vkController('left_blank')
+        if self.vk.mouseState:
+            self.vk.mouseController('blank')
+        else :
+            self.vk.vkController('left_blank')
 
     def rightClicked(self):
-        self.vk.vkController('right')
+        if self.vk.mouseState:
+            self.vk.mouseController('blank')
+        else :
+            self.vk.vkController('right')
 
     def leftClicked(self):
-        self.vk.vkController('left')
+        if self.vk.mouseState:
+            self.vk.mouseController('blank')
+        else :
+            self.vk.vkController('left')
 
 
 if __name__ == '__main__':
