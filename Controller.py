@@ -12,19 +12,19 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
         # Attrbuites
         self.button_to_key_dic = {}
         self.button_to_stylesheet_dic = {}
-        self.twoDButtons = list()
-        self.curserThread = CurserThread(self.twoDButtons)
-        self.eyeTrackerThread = EyeTrackerThread()
-        self.mouseThread=MouseThread()
-        self.chosenKey = None
-        self.prevKey = None
+        self.two_d_buttons = list()
+        self.curser_thread = CurserThread(self.two_d_buttons)
+        self.eye_tracker_thread = EyeTrackerThread()
+        self.mouse_thread=MouseThread()
+        self.chosen_key = None
+        self.prev_key = None
         self.caps_bool = False
         self.shift_bool = False
         self.ctrl_bool = False
         self.alt_bool = False
         self.mouse_bool=False
-        self.curserState=True
-        self.mouseState=False
+        self.curser_state=True
+        self.mouse_state=False
         self.speaker = pyttsx3.init()
 
         # Methods
@@ -58,7 +58,7 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 for i in row:
                     if i != "":
                         temp.append(i)
-                self.twoDButtons.append(temp)
+                self.two_d_buttons.append(temp)
 
     def buttonClicked(self):  # all buttons events
         sender = self.sender()
@@ -82,9 +82,9 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 sender.setStyleSheet(sender.styleSheet() + "background-color : #A364A0")
             else:
                 sender.setStyleSheet(self.button_to_stylesheet_dic[sender.objectName()])
-        if self.chosenKey == sender:
-            self.chosenKey.setStyleSheet(
-                self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
+        if self.chosen_key == sender:
+            self.chosen_key.setStyleSheet(
+                self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
 
     def boolTrueKey(self,sender):
         #   Shift Button
@@ -145,75 +145,75 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.mouse_b.setStyleSheet(self.button_to_stylesheet_dic['mouse_b'])
 
     def startCurserThread(self):
-        self.curserThread.change_value.connect(self.controlCurserThread)
-        self.curserThread.start()
+        self.curser_thread.change_value.connect(self.controlCurserThread)
+        self.curser_thread.start()
 
     def controlCurserThread(self, val):
-        self.chosenKey = getattr(self, val[1])
-        self.prevKey = getattr(self, val[0])
-        self.prevKey.setStyleSheet(self.button_to_stylesheet_dic[self.prevKey.objectName()])
-        self.fixStyleOfLastChosenKey(self.prevKey)
-        self.chosenKey.setStyleSheet(
-            self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
+        self.chosen_key = getattr(self, val[1])
+        self.prev_key = getattr(self, val[0])
+        self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
+        self.fixStyleOfLastChosenKey(self.prev_key)
+        self.chosen_key.setStyleSheet(
+            self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
 
     def vkController(self, comand):
-        if self.curserState:
+        if self.curser_state:
             if comand=='right_blank':               #Go down
-                self.curserThread.terminate()
-                self.chosenKey.setStyleSheet(self.button_to_stylesheet_dic[self.chosenKey.objectName()])
-                self.fixStyleOfLastChosenKey(self.chosenKey)
-                self.curserThread.row += 1
-                self.curserThread.row %= 7
-                self.curserThread.colmn = len(
-                    self.twoDButtons[self.curserThread.row]) - 1 if self.curserThread.colmn >= len(
-                    self.twoDButtons[self.curserThread.row]) else self.curserThread.colmn
-                self.curserThread.start()
+                self.curser_thread.terminate()
+                self.chosen_key.setStyleSheet(self.button_to_stylesheet_dic[self.chosen_key.objectName()])
+                self.fixStyleOfLastChosenKey(self.chosen_key)
+                self.curser_thread.row += 1
+                self.curser_thread.row %= 7
+                self.curser_thread.colmn = len(
+                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.colmn >= len(
+                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.colmn
+                self.curser_thread.start()
             elif comand=='left_blank':  #Stop Curser
-                self.curserState=False
-                self.curserThread.terminate()
+                self.curser_state=False
+                self.curser_thread.terminate()
             elif comand=='blank':   #press ChosenKey
-                self.chosenKey.click()
+                self.chosen_key.click()
             elif comand=='right':pass
             elif comand=='left':pass
             # else :print(f'in vkController this comand unvalid {comand} and state is True')
         else:
             if comand=='right_blank':   #GO Down Step
-                self.prevKey = self.chosenKey
-                self.prevKey.setStyleSheet(self.button_to_stylesheet_dic[self.prevKey.objectName()])
-                self.fixStyleOfLastChosenKey(self.prevKey)
-                self.curserThread.row += 1
-                self.curserThread.row = self.curserThread.row % 7
+                self.prev_key = self.chosen_key
+                self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
+                self.fixStyleOfLastChosenKey(self.prev_key)
+                self.curser_thread.row += 1
+                self.curser_thread.row = self.curser_thread.row % 7
 
-                self.curserThread.colmn = len(
-                    self.twoDButtons[self.curserThread.row]) - 1 if self.curserThread.colmn >= len(
-                    self.twoDButtons[self.curserThread.row]) else self.curserThread.colmn
-                self.chosenKey = getattr(self, self.twoDButtons[self.curserThread.row][self.curserThread.colmn])
-                self.chosenKey.setStyleSheet(
-                    self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
+                self.curser_thread.colmn = len(
+                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.colmn >= len(
+                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.colmn
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.chosen_key.setStyleSheet(
+                    self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             elif comand=='left_blank': #continue
-                self.curserState=True
-                self.curserThread.start()
-            elif comand=='blank':self.chosenKey.click()
+                self.curser_state=True
+                self.curser_thread.start()
+            elif comand=='blank':self.chosen_key.click()
             elif comand=='right':   #Go right Step
-                self.prevKey = self.chosenKey
-                self.prevKey.setStyleSheet(self.button_to_stylesheet_dic[self.prevKey.objectName()])
-                self.fixStyleOfLastChosenKey(self.prevKey)
-                self.curserThread.colmn += 1
-                self.curserThread.colmn = self.curserThread.colmn % len(self.twoDButtons[self.curserThread.row])
-                self.chosenKey = getattr(self, self.twoDButtons[self.curserThread.row][self.curserThread.colmn])
-                self.chosenKey.setStyleSheet(
-                    self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
+                self.prev_key = self.chosen_key
+                self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
+                self.fixStyleOfLastChosenKey(self.prev_key)
+                self.curser_thread.colmn += 1
+                self.curser_thread.colmn = self.curser_thread.colmn % len(self.two_d_buttons[self.curser_thread.row])
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.chosen_key.setStyleSheet(
+                    self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             elif comand=='left':    # Go Left Step
-                self.prevKey = self.chosenKey
-                self.prevKey.setStyleSheet(self.button_to_stylesheet_dic[self.prevKey.objectName()])
-                self.fixStyleOfLastChosenKey(self.prevKey)
-                self.curserThread.colmn -= 1
-                self.curserThread.colmn = (self.curserThread.colmn + len(
-                    self.twoDButtons[self.curserThread.row])) % len(
-                    self.twoDButtons[self.curserThread.row])
-                self.chosenKey = getattr(self, self.twoDButtons[self.curserThread.row][self.curserThread.colmn])
-                self.chosenKey.setStyleSheet(
-                    self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
+                self.prev_key = self.chosen_key
+                self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
+                self.fixStyleOfLastChosenKey(self.prev_key)
+                self.curser_thread.colmn -= 1
+                self.curser_thread.colmn = (self.curser_thread.colmn + len(
+                    self.two_d_buttons[self.curser_thread.row])) % len(
+                    self.two_d_buttons[self.curser_thread.row])
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.chosen_key.setStyleSheet(
+                    self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             # else :print(f'in vkController this comand unvalid {comand} and state is False')
 
     def fixStyleOfLastChosenKey(self, sender):
@@ -227,8 +227,8 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
             sender.setStyleSheet(sender.styleSheet() + "background-color : #A364A0")
 
     def startEyeTrackerThread(self):
-        self.eyeTrackerThread.change_value.connect(self.controlEyeTrackerThread)
-        self.eyeTrackerThread.start()
+        self.eye_tracker_thread.change_value.connect(self.controlEyeTrackerThread)
+        self.eye_tracker_thread.start()
 
 
     def controlEyeTrackerThread(self, val):
@@ -244,70 +244,54 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
 
     def startMouseThread(self):
         self.buttonAction('mouse_b')
-        if self.curserState:
-            self.curserState = False
-            self.curserThread.terminate()
-            self.mouseState = True
-            self.mouseThread.change_value.connect(self.controlMouseThread)
-            self.mouseThread.start()
+        if self.curser_state:
+            self.curser_state = False
+            self.curser_thread.terminate()
+            self.mouse_state = True
+            self.mouse_thread.change_value.connect(self.controlMouseThread)
+            self.mouse_thread.start()
         else:
-            self.curserState = True
-            self.curserThread.start()
-            self.mouseState=False
-            self.mouseThread.terminate()
+            self.curser_state = True
+            self.curser_thread.start()
+            self.mouse_state=False
+            self.mouse_thread.terminate()
             return
 
     def controlMouseThread(self,val):
         pass
 
     def mouseController(self,val):
-        if self.mouseState:
+        if self.mouse_state:
             if val=='blank':
-                self.mouseState=False
-                self.mouseThread.terminate()
+                self.mouse_state=False
+                self.mouse_thread.terminate()
             elif val=='right':
-                self.mouseThread.terminate()
-                self.mouseThread.moving_x=5
-                self.mouseThread.moving_y=0
-                self.mouseThread.start()
+                self.mouse_thread.terminate()
+                self.mouse_thread.moving_x=5
+                self.mouse_thread.moving_y=0
+                self.mouse_thread.start()
             elif val=='left':
-                self.mouseThread.terminate()
-                self.mouseThread.moving_x = -5
-                self.mouseThread.moving_y = 0
-                self.mouseThread.start()
+                self.mouse_thread.terminate()
+                self.mouse_thread.moving_x = -5
+                self.mouse_thread.moving_y = 0
+                self.mouse_thread.start()
             elif val=='right_blank':
-                self.mouseThread.terminate()
-                self.mouseThread.moving_x = 0
-                self.mouseThread.moving_y = 5
-                self.mouseThread.start()
+                self.mouse_thread.terminate()
+                self.mouse_thread.moving_x = 0
+                self.mouse_thread.moving_y = 5
+                self.mouse_thread.start()
             elif val=='left_blank':
-                self.mouseThread.terminate()
-                self.mouseThread.moving_x = 0
-                self.mouseThread.moving_y = -5
-                self.mouseThread.start()
+                self.mouse_thread.terminate()
+                self.mouse_thread.moving_x = 0
+                self.mouse_thread.moving_y = -5
+                self.mouse_thread.start()
         else:
             if val=='blank':
-                self.mouseThread.controller.click(Button.left,2)
+                self.mouse_thread.controller.click(Button.left, 2)
             elif val in ['right','left']:
-                self.mouseState=True
-                self.mouseThread.start()
+                self.mouse_state=True
+                self.mouse_thread.start()
             elif val=='right_blank':
-                self.mouseThread.controller.click(Button.right,1)
+                self.mouse_thread.controller.click(Button.right, 1)
             elif val=='left_blank':
-                self.mouseThread.controller.click(Button.left,1)
-
-
-
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    win = Controller()
-    win.show()
-    sys.exit(app.exec_())
+                self.mouse_thread.controller.click(Button.left, 1)

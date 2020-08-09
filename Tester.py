@@ -17,32 +17,32 @@ class TestVK(QWidget, testk.Ui_Form):
         self.right_b.clicked.connect(self.rightClicked)
         self.left_b.clicked.connect(self.leftClicked)
     def blankClicked(self):
-        if self.vk.mouseState:
+        if self.vk.mouse_state:
             self.vk.mouseController('blank')
         else :
             self.vk.setFocus()
             self.vk.vkController('blank')
 
     def rightBlanckstopClicked(self):
-        if self.vk.mouseState:
+        if self.vk.mouse_state:
             self.vk.mouseController('blank')
         else :
             self.vk.vkController('right_blank')
 
     def leftBlanckClicked(self):
-        if self.vk.mouseState:
+        if self.vk.mouse_state:
             self.vk.mouseController('blank')
         else :
             self.vk.vkController('left_blank')
 
     def rightClicked(self):
-        if self.vk.mouseState:
+        if self.vk.mouse_state:
             self.vk.mouseController('blank')
         else :
             self.vk.vkController('right')
 
     def leftClicked(self):
-        if self.vk.mouseState:
+        if self.vk.mouse_state:
             self.vk.mouseController('blank')
         else :
             self.vk.vkController('left')
