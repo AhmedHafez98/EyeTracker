@@ -1,7 +1,6 @@
 import cv2, numpy as np, dlib, time
 from math import hypot
 
-
 class Detection:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
@@ -119,9 +118,6 @@ class Detection:
 
         key = cv2.waitKey(6)
         return key
-
-
-
 
 if __name__ == '__main__':
     d = Detection()

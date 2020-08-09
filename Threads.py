@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread,pyqtSignal
 from win32api import GetSystemMetrics
 from pynput.mouse import Controller
-from ET import Detection
+from EyeTracker import Detection
 import time
 
 

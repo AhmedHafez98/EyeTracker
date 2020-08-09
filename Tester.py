@@ -2,6 +2,7 @@ from GUI import testk
 from PyQt5.QtWidgets import QWidget
 from Controller import Controller
 from PyQt5.QtCore import Qt
+
 class TestVK(QWidget, testk.Ui_Form):
     def __init__(self):
         super().__init__()
