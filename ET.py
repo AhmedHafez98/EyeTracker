@@ -6,10 +6,12 @@ class Detection:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
         self.detector = dlib.get_frontal_face_detector()
-        self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+        self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.frame = None
         self.gray = None
         self.blank = 0
+        self.comand=""
+        self.pre=None
 
     def midpoint(self, p1, p2):
         return int((p1.x + p2.x) / 2), int((p1.y + p2.y) / 2)
@@ -77,14 +79,13 @@ class Detection:
         gaze_ratio_right_eye = self.get_gaze_ratio([36, 37, 38, 39, 40, 41], landmark)
         gaze_ratio_left_eye = self.get_gaze_ratio([42, 43, 44, 45, 46, 47], landmark)
         gaze_ratio = (gaze_ratio_left_eye + gaze_ratio_right_eye) / 2
-        # print(gaze_ratio)
 
 
-        if blinking_ratio >= 5.2 and self.blank < 10:
+        if blinking_ratio >= 5.2:
             self.blank += 1
-        if self.blank>=10:
-            self.blank = 0
-            return 'blank'
+            if self.blank == 10:
+                self.blank = 0
+                return 'blank'
         elif gaze_ratio <= .8:
             self.blank = 0
             return 'right'
@@ -100,29 +101,26 @@ class Detection:
         else : return None
 
     def run(self):
-        pre=None
-        while True:
-            _, self.frame = self.cap.read()
-            self.frame = cv2.flip(self.frame, 1)
-            self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-            faces = self.detector(self.gray)
-            for face in faces:
-                landmarks = self.predictor(self.gray, face)
-                ret = self.get_operator(landmarks)
-                if pre!=ret and pre!=None:
-                    print(pre)
-                pre=ret
+        _, self.frame = self.cap.read()
+        self.frame = cv2.flip(self.frame, 1)
+        self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-                # print(ret)
-            cv2.imshow("Frame", self.frame)
+        faces = self.detector(self.gray)
+        for face in faces:
+            landmarks = self.predictor(self.gray, face)
+            ret = self.get_operator(landmarks)
+            if self.pre!=ret and self.pre!=None:
+                # print(pre)
+                self.comand=self.pre
+            self.pre=ret
 
-            key = cv2.waitKey(6)
-            if key == 27:
-                break
+        cv2.imshow("Frame", self.frame)
 
-        self.cap.release()
-        cv2.destroyAllWindows()
+        key = cv2.waitKey(6)
+        return key
+
+
 
 
 if __name__ == '__main__':

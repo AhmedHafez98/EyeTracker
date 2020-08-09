@@ -1,73 +1,11 @@
-import sys, time, csv, keyboard, qdarkstyle,pyttsx3
-from VirtualKeyboard.GUI import VKDesign, testk
-# from GazDetection.GazDetection import GazControl
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from pynput.mouse import Button,Controller
-from win32api import GetSystemMetrics
+import sys, csv, keyboard, qdarkstyle,pyttsx3
+from Threads import MouseThread,CurserThread,EyeTrackerThread
+from GUI import VKDesign
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtCore import Qt
+from pynput.mouse import Button
 
-class CurserThread(QThread):
-    def __init__(self, two_d_buttons):
-        QThread.__init__(self)
-        self.twoDButtons = two_d_buttons
-        self.row = 0
-        self.colmn = 0
-
-    change_value = pyqtSignal(tuple)
-
-    def run(self):
-        while True:
-            time.sleep(.5)
-            ch = self.twoDButtons[self.row][self.colmn]
-            self.colmn += 1
-            self.colmn = self.colmn % len(self.twoDButtons[self.row])
-            self.change_value.emit((ch, self.twoDButtons[self.row][self.colmn]))
-
-
-class EyeTrackerThread(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-
-    change_value = pyqtSignal(str)
-
-    def run(self):
-        self.change_value.emit(self.test.comand)
-
-class MouseThread(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-        self.controller = Controller()
-        self.moving_x = 0
-        self.moving_y = 25
-        self.mxHeight=GetSystemMetrics(1)
-        self.mxWidth=GetSystemMetrics(0)
-
-    change_value = pyqtSignal(str)
-
-    def run(self):
-        while True:
-            time.sleep(.2)
-            self.controller.move(self.moving_x,self.moving_y)
-            pos=self.controller.position
-            print(pos)
-            if self.moving_y:
-                if self.moving_y>0:
-                    if pos[1]>=self.mxHeight-1:
-                        self.moving_y=-self.moving_y
-                else:
-                    if pos[1]<=0:
-                        self.moving_y=-self.moving_y
-            else :
-                if self.moving_x > 0:
-                    if pos[0] >= self.mxWidth-1:
-                        self.moving_x = -self.moving_x
-                else:
-                    if pos[0] <= 0:
-                        self.moving_x = -self.moving_x
-
-            self.change_value.emit("")
-
-class VK(QMainWindow, VKDesign.Ui_MainWindow):
+class Controller(QMainWindow, VKDesign.Ui_MainWindow):
 
     def __init__(self):
         super().__init__()
@@ -94,7 +32,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
         self.connectKeys()
         self.startCurserThread()
         self.makeButtons2D()
-        # self.startEyeTrackerThread()
+        self.startEyeTrackerThread()
 
     def initUi(self):  # modify the UI here
         self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
@@ -104,7 +42,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     def connectKeys(self):  # connect each button to event
-        with open('MapKeys.csv') as file:
+        with open('CSV/MapKeys.csv') as file:
             reader = csv.reader(file)
             for row in reader:
                 self.button_to_key_dic[row[0]] = row[1]
@@ -113,7 +51,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 a.clicked.connect(self.buttonClicked)
 
     def makeButtons2D(self):
-        with open('TwoDButtons.csv') as file:
+        with open('CSV/TwoDButtons.csv') as file:
             reader = csv.reader(file)
             for row in reader:
                 temp = list()
@@ -206,7 +144,6 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
             else:
                 self.mouse_b.setStyleSheet(self.button_to_stylesheet_dic['mouse_b'])
 
-
     def startCurserThread(self):
         self.curserThread.change_value.connect(self.controlCurserThread)
         self.curserThread.start()
@@ -238,7 +175,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 self.chosenKey.click()
             elif comand=='right':pass
             elif comand=='left':pass
-            else :print(f'in vkController this comand unvalid {comand} and state is True')
+            # else :print(f'in vkController this comand unvalid {comand} and state is True')
         else:
             if comand=='right_blank':   #GO Down Step
                 self.prevKey = self.chosenKey
@@ -246,7 +183,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 self.fixStyleOfLastChosenKey(self.prevKey)
                 self.curserThread.row += 1
                 self.curserThread.row = self.curserThread.row % 7
-                # print(len(self.twoDButtons[self.curserThread.row]), self.curserThread.colmn)
+
                 self.curserThread.colmn = len(
                     self.twoDButtons[self.curserThread.row]) - 1 if self.curserThread.colmn >= len(
                     self.twoDButtons[self.curserThread.row]) else self.curserThread.colmn
@@ -277,7 +214,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
                 self.chosenKey = getattr(self, self.twoDButtons[self.curserThread.row][self.curserThread.colmn])
                 self.chosenKey.setStyleSheet(
                     self.button_to_stylesheet_dic[self.chosenKey.objectName()] + "background-color : #1464A0")
-            else :print(f'in vkController this comand unvalid {comand} and state is False')
+            # else :print(f'in vkController this comand unvalid {comand} and state is False')
 
     def fixStyleOfLastChosenKey(self, sender):
         if self.button_to_key_dic[sender.objectName()] == 'caps_lock' and self.caps_bool:
@@ -292,6 +229,7 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
     def startEyeTrackerThread(self):
         self.eyeTrackerThread.change_value.connect(self.controlEyeTrackerThread)
         self.eyeTrackerThread.start()
+
 
     def controlEyeTrackerThread(self, val):
         if self.mouse_bool:
@@ -365,54 +303,11 @@ class VK(QMainWindow, VKDesign.Ui_MainWindow):
 
 
 
-class TestVK(QWidget, testk.Ui_Form):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.setGeometry(0, 0, 400, 200)
-        self.vk = VK()
-        self.vk.show()
-        self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
-        self.vk.setFocus()
-        self.blank_b.clicked.connect(self.blankClicked)
-        self.right_blank_b.clicked.connect(self.rightBlanckstopClicked)
-        self.left_blank_b.clicked.connect(self.leftBlanckClicked)
-        self.right_b.clicked.connect(self.rightClicked)
-        self.left_b.clicked.connect(self.leftClicked)
-    def blankClicked(self):
-        if self.vk.mouseState:
-            self.vk.mouseController('blank')
-        else :
-            self.vk.setFocus()
-            self.vk.vkController('blank')
 
-    def rightBlanckstopClicked(self):
-        if self.vk.mouseState:
-            self.vk.mouseController('blank')
-        else :
-            self.vk.vkController('right_blank')
-
-    def leftBlanckClicked(self):
-        if self.vk.mouseState:
-            self.vk.mouseController('blank')
-        else :
-            self.vk.vkController('left_blank')
-
-    def rightClicked(self):
-        if self.vk.mouseState:
-            self.vk.mouseController('blank')
-        else :
-            self.vk.vkController('right')
-
-    def leftClicked(self):
-        if self.vk.mouseState:
-            self.vk.mouseController('blank')
-        else :
-            self.vk.vkController('left')
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = TestVK()
+    win = Controller()
     win.show()
     sys.exit(app.exec_())
