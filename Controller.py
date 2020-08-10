@@ -1,8 +1,8 @@
 import sys, csv, keyboard, qdarkstyle,pyttsx3
 from Threads import MouseThread,CurserThread,EyeTrackerThread
 from GUI import VKDesign
-from PyQt5.QtWidgets import QMainWindow, QApplication
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtCore import Qt,QThread
 from pynput.mouse import Button
 
 class Controller(QMainWindow, VKDesign.Ui_MainWindow):
@@ -228,8 +228,7 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
 
     def startEyeTrackerThread(self):
         self.eye_tracker_thread.change_value.connect(self.controlEyeTrackerThread)
-        self.eye_tracker_thread.start()
-
+        self.eye_tracker_thread.start(QThread.HighPriority)
 
     def controlEyeTrackerThread(self, val):
         if self.mouse_bool:

@@ -4,6 +4,23 @@ from pynput.mouse import Controller
 from EyeTracker import Detection
 import time
 
+class EyeTrackerThread(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+        self.d=Detection()
+
+
+    change_value = pyqtSignal(str)
+
+    def run(self):
+        pre = 'open'
+        while True:
+            cur = self.d.maxIn10Frames()
+            if cur != pre and cur == 'open':
+                self.change_value.emit(pre)
+                print(pre)
+            pre = cur
+
 
 class CurserThread(QThread):
     def __init__(self, two_d_buttons):
@@ -60,17 +77,3 @@ class MouseThread(QThread):
             self.change_value.emit("")
 
 
-class EyeTrackerThread(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-        self.d = Detection()
-
-    change_value = pyqtSignal(str)
-
-    def run(self):
-        while True:
-            key=self.d.run()
-            print(self.d.comand)
-            self.change_value.emit(self.d.comand)
-            if key==27:
-                break
