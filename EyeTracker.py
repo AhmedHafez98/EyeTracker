@@ -29,7 +29,7 @@ class Detection:
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.yourEyes = 2200
-        self.frames = 5
+        self.frames = 7
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
