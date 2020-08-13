@@ -1,4 +1,4 @@
-import sys, csv, keyboard, qdarkstyle,pyttsx3
+import csv, keyboard, qdarkstyle,pyttsx3
 from Threads import MouseThread,CurserThread,EyeTrackerThread
 from GUI import VKDesign
 from PyQt5.QtWidgets import QMainWindow

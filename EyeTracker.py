@@ -28,8 +28,8 @@ class Detection:
         self.cap = cv2.VideoCapture(0)
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
-        self.yourEyes = 2200
-        self.frames = 7
+        self.yourEyes = 2400
+        self.frames = 6
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
@@ -46,9 +46,9 @@ class Detection:
             frame = cv2.flip(frame, 1)
             frame = cv2.resize(frame, None, fx=0.76, fy=0.76)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = self.detector(frame,0)
+            faces = self.detector(gray,0)
             for face in faces:
-                shape = self.predictor(frame, face)
+                shape = self.predictor(gray, face)
                 shape = face_utils.shape_to_np(shape)
                 leftEye = shape[self.lStart:self.lEnd]
                 rightEye = shape[self.rStart:self.rEnd]

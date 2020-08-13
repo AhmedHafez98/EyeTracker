@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread,pyqtSignal
 from win32api import GetSystemMetrics
 from pynput.mouse import Controller
-from EyeTracker import Detection
+from EyeTrackerV2 import Detection
 import time
 
 class EyeTrackerThread(QThread):
@@ -33,7 +33,7 @@ class CurserThread(QThread):
 
     def run(self):
         while True:
-            time.sleep(.5)
+            time.sleep(.8)
             ch = self.twoDButtons[self.row][self.colmn]
             self.colmn += 1
             self.colmn = self.colmn % len(self.twoDButtons[self.row])
