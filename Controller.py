@@ -42,7 +42,7 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     def connectKeys(self):  # connect each button to event
-        with open('CSV/MapKeys.csv') as file:
+        with open('Resources/CSV/MapKeys.csv') as file:
             reader = csv.reader(file)
             for row in reader:
                 self.button_to_key_dic[row[0]] = row[1]
@@ -51,7 +51,7 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 a.clicked.connect(self.buttonClicked)
 
     def makeButtons2D(self):
-        with open('CSV/TwoDButtons.csv') as file:
+        with open('Resources/CSV/TwoDButtons.csv') as file:
             reader = csv.reader(file)
             for row in reader:
                 temp = list()

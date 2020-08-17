@@ -1,5 +1,4 @@
 import cv2,dlib
-from math import hypot
 font=cv2.FONT_HERSHEY_SIMPLEX
 from scipy.spatial import distance as dist
 from imutils import face_utils
@@ -91,7 +90,7 @@ class Detection:
         for i in range(self.frames):
             ret, frame = self.cap.read()
             frame = cv2.flip(frame, 1)
-            frame = cv2.resize(frame, None, fx=0.76, fy=0.76)
+            frame = cv2.resize(frame, None, fx=0.60, fy=0.60)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = self.detector(gray,0)
 
