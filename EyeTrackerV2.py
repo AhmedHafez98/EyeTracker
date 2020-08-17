@@ -4,7 +4,6 @@ font=cv2.FONT_HERSHEY_SIMPLEX
 from scipy.spatial import distance as dist
 from imutils import face_utils
 import numpy as np
-
 def midpoint(p1, p2):
     return int((p1.x + p2.x) / 2), int((p1.y + p2.y) / 2)
 
@@ -30,7 +29,7 @@ class Detection:
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.yourEyes = 2300
-        self.frames = 10
+        self.frames = 5
         self.movement_range=(800,1200)
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
@@ -96,8 +95,8 @@ class Detection:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = self.detector(gray,0)
 
-
-            for face in faces:
+            try :
+                face = faces[0]
 
                 shape = self.predictor(gray, face)
                 shape = face_utils.shape_to_np(shape)
@@ -137,9 +136,9 @@ class Detection:
                     findMovement['right'] += 1
                 else:
                     findMovement['open'] += 1
+                cv2.imshow('frame', frame)
 
-            cv2.imshow('frame', frame)
-
+            except:pass
             if cv2.waitKey(1)>100:
                 break
 
