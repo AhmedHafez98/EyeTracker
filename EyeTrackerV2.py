@@ -135,7 +135,7 @@ class Detection:
                     findMovement['open'] += 1
 
             except:pass
-            if cv2.waitKey(5)>27:
+            if cv2.waitKey(1)>27:
                 break
 
         cv2.imshow('frame', frame)

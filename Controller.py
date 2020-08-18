@@ -312,4 +312,3 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
 
     def changeWord(self):
         self.word_prediction.Words=self.textEdit.toPlainText()
-

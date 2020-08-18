@@ -4,6 +4,8 @@ from pynput.mouse import Controller
 from EyeTrackerV2 import Detection
 import time
 from WordPrediction import predict_word
+
+
 class EyeTrackerThread(QThread):
     def __init__(self):
         QThread.__init__(self)
@@ -18,9 +20,8 @@ class EyeTrackerThread(QThread):
             cur = self.d.maxIn10Frames()
             if cur != pre and cur == 'open':
                 self.change_value.emit(pre)
-                # print(pre)
+                print(pre)
             pre = cur
-
 
 class CurserThread(QThread):
     def __init__(self, two_d_buttons):
@@ -38,7 +39,6 @@ class CurserThread(QThread):
             self.colmn += 1
             self.colmn = self.colmn % len(self.twoDButtons[self.row])
             self.change_value.emit((ch, self.twoDButtons[self.row][self.colmn]))
-
 
 class MouseThread(QThread):
     def __init__(self):
