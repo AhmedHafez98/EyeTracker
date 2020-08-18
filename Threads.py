@@ -24,21 +24,22 @@ class EyeTrackerThread(QThread):
             pre = cur
 
 class CurserThread(QThread):
+
     def __init__(self, two_d_buttons):
         QThread.__init__(self)
         self.twoDButtons = two_d_buttons
         self.row = 0
-        self.colmn = 0
+        self.column = 0
 
-    change_value = pyqtSignal(tuple)
+    change_value = pyqtSignal(tuple)    #this signal has chosen key and prev key
 
     def run(self):
         while True:
             time.sleep(.8)
-            ch = self.twoDButtons[self.row][self.colmn]
-            self.colmn += 1
-            self.colmn = self.colmn % len(self.twoDButtons[self.row])
-            self.change_value.emit((ch, self.twoDButtons[self.row][self.colmn]))
+            prev_key = self.twoDButtons[self.row][self.column]
+            self.column += 1
+            self.column = self.column % len(self.twoDButtons[self.row])
+            self.change_value.emit((prev_key, self.twoDButtons[self.row][self.column]))
 
 class MouseThread(QThread):
     def __init__(self):

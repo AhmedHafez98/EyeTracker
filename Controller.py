@@ -6,36 +6,60 @@ from PyQt5.QtCore import Qt,QThread
 from pynput.mouse import Button
 
 class Controller(QMainWindow, VKDesign.Ui_MainWindow):
-
     def __init__(self):
         super().__init__()
         # Attrbuites
         self.button_to_key_dic = {}
+            #here we link objectName to Key Command Filled from MapKeys.csv
         self.button_to_stylesheet_dic = {}
+            #here we link obkectName to Main style sheet for each button
         self.two_d_buttons = list()
+            #here we divide button to rows and columns to move in it by Curser thread
         self.curser_thread = CurserThread(self.two_d_buttons)
+            #here we make object form Curser thread to use this obkect in Controller
         self.eye_tracker_thread = EyeTrackerThread()
+            # here we make object form EyeTracker thread to use this obkect in Controller
         self.mouse_thread=MouseThread()
+            # here we make object form Mouse thread to use this obkect in Controller
         self.word_prediction=Prediction()
+            # here we make object form WordPrediction thread to use this obkect in Controller
         self.chosen_key = None
+            #make reference for chosen key in curser thread
         self.prev_key = None
+            #make reference for prev key in curser thread
         self.caps_bool = False
+            #To Know if caps_look button on or of
         self.shift_bool = False
+            #To Know if shift button on or of
         self.ctrl_bool = False
+            #To Know if ctrl button on or of
         self.alt_bool = False
+            #To Know if alt button on or of
         self.mouse_bool=False
+            #To Know if mouse button on or of
         self.curser_state=True
+            #To Know the curser state moving or stoped
         self.mouse_state=False
+            #To Know the mouse state moving or stoped
         self.speaker = pyttsx3.init()
+            #Make opject for TextToSpeech
 
         # Methods
         self.initUi()
+            #here we apply the ui made from QDesigner and Qdarkstyle
         self.connectKeys()
+            #here we connect each button in VK MainWindow to Keyboard Conmmad
         self.startCurserThread()
+            #here we start the Curser thread
         self.makeButtons2D()
+            #here we fill two_d_button list from MapKeys.csv
         self.startEyeTrackerThread()
+            #here we start the EyeTracker thread
         self.textEdit.textChanged.connect(self.changeWord)
+            #here to get every change in textEdit and send it to Word predection thread
         self.startWordPredection()
+            #here we start the wordPredection thread
+
 
     def initUi(self):  # modify the UI here
         self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
@@ -167,9 +191,9 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.fixStyleOfLastChosenKey(self.chosen_key)
                 self.curser_thread.row += 1
                 self.curser_thread.row %= 7
-                self.curser_thread.colmn = len(
-                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.colmn >= len(
-                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.colmn
+                self.curser_thread.column = len(
+                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.column >= len(
+                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.column
                 self.curser_thread.start()
             elif comand=='left_blank':  #Stop Curser
                 self.curser_state=False
@@ -188,10 +212,10 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.curser_thread.row += 1
                 self.curser_thread.row = self.curser_thread.row % 7
 
-                self.curser_thread.colmn = len(
-                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.colmn >= len(
-                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.colmn
-                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.curser_thread.column = len(
+                    self.two_d_buttons[self.curser_thread.row]) - 1 if self.curser_thread.column >= len(
+                    self.two_d_buttons[self.curser_thread.row]) else self.curser_thread.column
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.column])
                 self.chosen_key.setStyleSheet(
                     self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             elif comand=='left_blank': #continue
@@ -202,20 +226,20 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.prev_key = self.chosen_key
                 self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
                 self.fixStyleOfLastChosenKey(self.prev_key)
-                self.curser_thread.colmn += 1
-                self.curser_thread.colmn = self.curser_thread.colmn % len(self.two_d_buttons[self.curser_thread.row])
-                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.curser_thread.column += 1
+                self.curser_thread.column = self.curser_thread.column % len(self.two_d_buttons[self.curser_thread.row])
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.column])
                 self.chosen_key.setStyleSheet(
                     self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             elif comand=='left':    # Go Left Step
                 self.prev_key = self.chosen_key
                 self.prev_key.setStyleSheet(self.button_to_stylesheet_dic[self.prev_key.objectName()])
                 self.fixStyleOfLastChosenKey(self.prev_key)
-                self.curser_thread.colmn -= 1
-                self.curser_thread.colmn = (self.curser_thread.colmn + len(
+                self.curser_thread.column -= 1
+                self.curser_thread.column = (self.curser_thread.column + len(
                     self.two_d_buttons[self.curser_thread.row])) % len(
                     self.two_d_buttons[self.curser_thread.row])
-                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.colmn])
+                self.chosen_key = getattr(self, self.two_d_buttons[self.curser_thread.row][self.curser_thread.column])
                 self.chosen_key.setStyleSheet(
                     self.button_to_stylesheet_dic[self.chosen_key.objectName()] + "background-color : #1464A0")
             # else :print(f'in vkController this comand unvalid {comand} and state is False')
