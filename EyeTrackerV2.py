@@ -29,7 +29,7 @@ class Detection:
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.yourEyes = 2300
         self.frames = 5
-        self.movement_range=(700,1200)
+        self.movement_range=(600,1200)
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
@@ -76,7 +76,7 @@ class Detection:
     def maxIn10Frames(self):
 
         findBlanking = {
-            'blank': 0,
+            'blank': -2,
             'right_blank': 0,
             'left_blank': 0,
             'open': 0
@@ -135,7 +135,7 @@ class Detection:
                     findMovement['open'] += 1
 
             except:pass
-            if cv2.waitKey(1)>27:
+            if cv2.waitKey(5)>27:
                 break
 
         cv2.imshow('frame', frame)

@@ -1,5 +1,5 @@
 import csv, keyboard, qdarkstyle,pyttsx3
-from Threads import MouseThread,CurserThread,EyeTrackerThread
+from Threads import MouseThread,CurserThread,EyeTrackerThread,Prediction
 from GUI import VKDesign
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import Qt,QThread
@@ -16,6 +16,7 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
         self.curser_thread = CurserThread(self.two_d_buttons)
         self.eye_tracker_thread = EyeTrackerThread()
         self.mouse_thread=MouseThread()
+        self.word_prediction=Prediction()
         self.chosen_key = None
         self.prev_key = None
         self.caps_bool = False
@@ -33,6 +34,8 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
         self.startCurserThread()
         self.makeButtons2D()
         self.startEyeTrackerThread()
+        self.textEdit.textChanged.connect(self.changeWord)
+        self.startWordPredection()
 
     def initUi(self):  # modify the UI here
         self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
@@ -173,7 +176,8 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.curser_thread.terminate()
             elif comand=='blank':   #press ChosenKey
                 self.chosen_key.click()
-            elif comand=='right':pass
+            elif comand=='right':
+                pass
             elif comand=='left':pass
             # else :print(f'in vkController this comand unvalid {comand} and state is True')
         else:
@@ -294,3 +298,18 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.mouse_thread.controller.click(Button.right, 1)
             elif val=='left_blank':
                 self.mouse_thread.controller.click(Button.left, 1)
+
+    def startWordPredection(self):
+        self.word_prediction.change_value.connect(self.controlWordPredection)
+        self.word_prediction.start()
+
+    def controlWordPredection(self,val):
+        self.word_suggest_b1.setText(val[0])
+        self.word_suggest_b2.setText(val[1])
+        self.word_suggest_b3.setText(val[2])
+        self.word_suggest_b4.setText(val[3])
+        self.word_suggest_b5.setText(val[4])
+
+    def changeWord(self):
+        self.word_prediction.Words=self.textEdit.toPlainText()
+

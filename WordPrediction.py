@@ -12,35 +12,28 @@ import pickle
 import re
 from keras.layers import LSTM, Dense, Embedding
 import tensorflow as tf
+
+
 def load_object(filename):
     infile = open(filename, 'rb')
     obj = pickle.load(infile)
     infile.close()
     return obj
 #if text empty return the (top_n-1) occurrence words
-def build_model():
-    seq_len=load_object("Resources/Prediction/seq_len.pkl")
-    vocabulary_size=load_object("vocabulary_size.pkl")
-    train_inputs=load_object("train_inputs.pkl")
-    train_targets = load_object("train_targets.pkl")
-    train_targets = to_categorical(train_targets, num_classes=vocabulary_size)
-    model = Sequential()
-    model.add(Embedding(vocabulary_size, seq_len, input_length=seq_len))
-    model.add(LSTM(50, return_sequences=True))
-    model.add(LSTM(50))
-    model.add(Dense(50, activation='relu'))
-    model.add(Dense(vocabulary_size, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(train_inputs, train_targets, epochs=100, verbose=2)
-    model.save('keras_next_word_model.h5')
+model=None
+def fillModel():
+    global model
+    model = load_model('Resources/Prediction/keras_next_word_model.h5')
 
 def predict_next_word(input_text,top_n=6):
     # not tested
     if len(input_text)==0:
         word_dict=load_object("Resources/Prediction/word_dict")
         sug=[]
-        for x,y in dict(collections.Counter(word_dict).most_common(top_n-1)):
-            sug.append(x)
+
+        for x in dict(collections.Counter(word_dict).most_common(top_n)):
+            if x != 'â':
+                sug.append(x)
         return sug
     input_text="emp emp emp "+input_text
     tokenizer=load_object("Resources/Prediction/tokenizer.pkl")
@@ -48,7 +41,6 @@ def predict_next_word(input_text,top_n=6):
     encoded_text = tokenizer.texts_to_sequences([input_text])[0]
     pad_encoded = pad_sequences([encoded_text], maxlen=seq_len, truncating='pre')
 
-    model=load_model('Resources/Prediction/keras_next_word_model.h5')
     suggestion=[]
     #print("holla")
     classes=model.predict(pad_encoded)
@@ -121,4 +113,5 @@ if __name__ == '__main__':
     # True if you want to predict the current word
     # False if you want to predict the next word
     # build_model()
-    print(predict_word("the old man had lft", True))
+    fillModel()
+    print(predict_word("the old man had ben", True))

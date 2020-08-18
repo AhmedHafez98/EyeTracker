@@ -3,7 +3,7 @@ from win32api import GetSystemMetrics
 from pynput.mouse import Controller
 from EyeTrackerV2 import Detection
 import time
-
+from WordPrediction import predict_word
 class EyeTrackerThread(QThread):
     def __init__(self):
         QThread.__init__(self)
@@ -18,7 +18,7 @@ class EyeTrackerThread(QThread):
             cur = self.d.maxIn10Frames()
             if cur != pre and cur == 'open':
                 self.change_value.emit(pre)
-                print(pre)
+                # print(pre)
             pre = cur
 
 
@@ -38,8 +38,6 @@ class CurserThread(QThread):
             self.colmn += 1
             self.colmn = self.colmn % len(self.twoDButtons[self.row])
             self.change_value.emit((ch, self.twoDButtons[self.row][self.colmn]))
-
-
 
 
 class MouseThread(QThread):
@@ -76,4 +74,30 @@ class MouseThread(QThread):
 
             self.change_value.emit("")
 
+class Prediction(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+        self.Words=""
+        self.Bool=False
+
+    change_value = pyqtSignal(list)
+    def fillBool(self):
+        ch=' '
+        if len(self.Words):
+            ch=self.Words[-1]
+        else: return False
+
+        if ch.isalpha():
+            return True
+        else: return False
+    def run(self):
+        while True:
+            time.sleep(1)
+            self.Bool=self.fillBool()
+            try:
+                lst=predict_word(self.Words,self.Bool)
+            except Exception as ex:
+                lst=['','','','','']
+                print(ex)
+            self.change_value.emit(list(lst))
 
