@@ -115,8 +115,6 @@ class Detection:
                 cv2.putText(frame, str(leftEAR), (50, 150), font, 1, (0, 0, 255))
                 cv2.putText(frame, str(rightEAR), (300, 150), font, 1, (0, 0, 255))
 
-
-
                 if leftEAR < self.yourEyes and rightEAR < self.yourEyes:
                     findBlanking['blank'] += 1
                 elif leftEAR < self.yourEyes:
