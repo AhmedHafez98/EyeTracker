@@ -29,7 +29,7 @@ class Detection:
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.yourEyes = 2300
         self.frames = 5
-        self.movement_range=(800,1200)
+        self.movement_range=(700,1200)
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
@@ -133,12 +133,12 @@ class Detection:
                     findMovement['right'] += 1
                 else:
                     findMovement['open'] += 1
-                cv2.imshow('frame', frame)
 
             except:pass
-            if cv2.waitKey(1)>100:
+            if cv2.waitKey(1)>27:
                 break
 
+        cv2.imshow('frame', frame)
         mx = ('', 0)
         for key in findBlanking:
             if findBlanking[key] >= mx[1]:
