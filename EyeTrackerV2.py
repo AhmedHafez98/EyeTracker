@@ -28,8 +28,8 @@ class Detection:
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(r"Resources\shape_predictor_68_face_landmarks.dat")
         self.yourEyes = 2300
-        self.frames = 5
-        self.movement_range=(600,1200)
+        self.frames = 7
+        self.movement_range=(600,1000)
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
@@ -110,10 +110,10 @@ class Detection:
 
                 leftEyeHull = cv2.convexHull(leftEye)
                 rightEyeHull = cv2.convexHull(rightEye)
-                cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-                cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-                cv2.putText(frame, str(leftEAR), (50, 150), font, 1, (0, 0, 255))
-                cv2.putText(frame, str(rightEAR), (300, 150), font, 1, (0, 0, 255))
+                # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+                # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+                # cv2.putText(frame, str(leftEAR), (50, 150), font, 1, (0, 0, 255))
+                # cv2.putText(frame, str(rightEAR), (300, 150), font, 1, (0, 0, 255))
 
                 if leftEAR < self.yourEyes and rightEAR < self.yourEyes:
                     findBlanking['blank'] += 1
@@ -134,11 +134,11 @@ class Detection:
                 else:
                     findMovement['open'] += 1
 
+                cv2.imshow('frame', frame)
             except:pass
             if cv2.waitKey(1)>27:
                 break
 
-        cv2.imshow('frame', frame)
         mx = ('', 0)
         for key in findBlanking:
             if findBlanking[key] >= mx[1]:
@@ -156,8 +156,8 @@ class Detection:
         _,frame=self.cap.read()
         frame = cv2.flip(frame, 1)
         frame = cv2.resize(frame, None, fx=0.76, fy=0.76)
-        cv2.putText(frame, str(messege1), (30, 100), font, 1, (0, 0, 255))
-        cv2.putText(frame, str(messege2), (30, 150), font, 1, (0, 0, 255))
+        # cv2.putText(frame, str(messege1), (30, 100), font, 1, (0, 0, 255))
+        # cv2.putText(frame, str(messege2), (30, 150), font, 1, (0, 0, 255))
         cv2.imshow('frame', frame)
         key= cv2.waitKey(1)
         return key

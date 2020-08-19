@@ -199,7 +199,8 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
                 self.curser_state=False
                 self.curser_thread.terminate()
             elif comand=='blank':   #press ChosenKey
-                self.chosen_key.click()
+                # self.chosen_key.click()
+                pass
             elif comand=='right':
                 pass
             elif comand=='left':pass
