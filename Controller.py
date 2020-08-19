@@ -8,7 +8,7 @@ from pynput.mouse import Button
 class Controller(QMainWindow, VKDesign.Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        # Attrbuites
+        # Attributes
         self.button_to_key_dic = {}
             #here we link objectName to Key Command Filled from MapKeys.csv
         self.button_to_stylesheet_dic = {}
