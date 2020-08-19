@@ -93,7 +93,7 @@ class Prediction(QThread):
         else: return False
     def run(self):
         while True:
-            time.sleep(1)
+            time.sleep(.5)
             self.Bool=self.fillBool()
             try:
                 lst=predict_word(self.Words,self.Bool)

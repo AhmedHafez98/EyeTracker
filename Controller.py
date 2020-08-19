@@ -90,6 +90,15 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
     def buttonClicked(self):  # all buttons events
         sender = self.sender()
         self.textEdit.setFocus()
+
+        if sender.objectName()=='word_suggest_b1':
+            str=''
+            if len(self.textEdit.toPlainText()) and self.textEdit.toPlainText()[-1]!=' ':
+                str=self.textEdit.toPlainText()
+                while len(str) and str[-1]!=' ':
+                    str=str[:-1]
+                self.textEdit.setText('')
+                keyboard.write(str)
         c_key = self.button_to_key_dic[sender.objectName()]
         if c_key in ['shift', 'ctrl', 'alt']:
             self.buttonAction(c_key)
@@ -102,7 +111,6 @@ class Controller(QMainWindow, VKDesign.Ui_MainWindow):
         else:
             keyboard.press_and_release(self.button_to_key_dic[sender.objectName()])
             self.boolTrueKey(sender)
-
         if sender.objectName() == 'caps_lock_b':
             self.caps_bool = not self.caps_bool
             if self.caps_bool:
