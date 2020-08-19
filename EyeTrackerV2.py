@@ -76,7 +76,7 @@ class Detection:
     def maxIn10Frames(self):
 
         findBlanking = {
-            'blank': -2,
+            'blank': 0,
             'right_blank': 0,
             'left_blank': 0,
             'open': 0
